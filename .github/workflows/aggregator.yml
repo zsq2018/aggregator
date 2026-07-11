@@ -27,20 +27,26 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
+      - name: Prepare directories
+        run: |
+          mkdir -p clash data subconverter
+
       - name: Download subconverter binary
         run: |
-          curl -sL -o subconverter/subconverter-linux-amd https://github.com/wzdnzd/aggregator/raw/main/subconverter/subconverter-linux-amd
+          curl -sL -o subconverter/subconverter-linux-amd \
+            https://github.com/wzdnzd/aggregator/raw/main/subconverter/subconverter-linux-amd
           chmod +x subconverter/subconverter-linux-amd
 
       - name: Download clash binary
         run: |
-          curl -sL -o clash/clash-linux-amd https://github.com/wzdnzd/aggregator/raw/main/clash/clash-linux-amd
+          curl -sL -o clash/clash-linux-amd \
+            https://github.com/wzdnzd/aggregator/raw/main/clash/clash-linux-amd
           chmod +x clash/clash-linux-amd
 
-      - name: Download data files
+      - name: Download Country.mmdb
         run: |
-          mkdir -p data
-          curl -sL -o data/Country.mmdb https://github.com/wzdnzd/aggregator/raw/main/clash/Country.mmdb
+          curl -sL -o data/Country.mmdb \
+            https://github.com/wzdnzd/aggregator/raw/main/clash/Country.mmdb
 
       - name: Run aggregator
         env:
