@@ -1,0 +1,129 @@
+{
+    "domains": [
+        {
+            "name": "free-sub",
+            "domain": "",
+            "sub": [
+                "https://raw.githubusercontent.com/freefq/free/master/v2"
+            ],
+            "enable": true,
+            "rename": "",
+            "include": "",
+            "exclude": "",
+            "push_to": ["output"],
+            "ignorede": true,
+            "liveness": true,
+            "rate": 5.0,
+            "count": 1,
+            "coupon": "",
+            "secure": false
+        }
+    ],
+    "crawl": {
+        "enable": true,
+        "exclude": "",
+        "threshold": 3,
+        "singlelink": true,
+        "persist": {
+            "subs": "crawledsubs",
+            "proxies": "crawledproxies"
+        },
+        "config": {
+            "rename": "",
+            "include": "",
+            "exclude": "",
+            "liveness": true
+        },
+        "telegram": {
+            "enable": true,
+            "pages": 3,
+            "exclude": "",
+            "users": {
+                "ShadowProxy66": {"push_to": ["output"]},
+                "v2ray_free_link": {"push_to": ["output"]},
+                "proxy_channel": {"push_to": ["output"]},
+                "PrivateVPNs": {"push_to": ["output"]},
+                "FV2ray": {"push_to": ["output"]},
+                "configslist": {"push_to": ["output"]},
+                "ShadowProxy77": {"push_to": ["output"]},
+                "proxy_scraper": {"push_to": ["output"]}
+            }
+        },
+        "google": {
+            "enable": false,
+            "exclude": "",
+            "limits": 50,
+            "notinurl": [],
+            "push_to": ["output"]
+        },
+        "yandex": {
+            "enable": false,
+            "exclude": "",
+            "within": 3,
+            "pages": 3,
+            "notinurl": [],
+            "push_to": ["output"]
+        },
+        "github": {
+            "enable": true,
+            "pages": 3,
+            "push_to": ["output"],
+            "exclude": "",
+            "spams": []
+        },
+        "twitter": {
+            "enable": false,
+            "users": {}
+        },
+        "repositories": [],
+        "pages": [],
+        "scripts": []
+    },
+    "groups": {
+        "output": {
+            "emoji": true,
+            "list": true,
+            "targets": {
+                "clash": "gist-clash",
+                "v2ray": "gist-v2ray",
+                "singbox": "gist-singbox"
+            },
+            "regularize": {
+                "enable": true,
+                "locate": true,
+                "residential": false,
+                "bits": 2
+            }
+        }
+    },
+    "storage": {
+        "engine": "gist",
+        "items": {
+            "gist-clash": {
+                "username": "zsq2018",
+                "gistid": "5af7f28e6efb5d79e8e179dba3dd4bfa",
+                "filename": "clash.yaml"
+            },
+            "gist-v2ray": {
+                "username": "zsq2018",
+                "gistid": "5af7f28e6efb5d79e8e179dba3dd4bfa",
+                "filename": "v2ray.txt"
+            },
+            "gist-singbox": {
+                "username": "zsq2018",
+                "gistid": "5af7f28e6efb5d79e8e179dba3dd4bfa",
+                "filename": "singbox.json"
+            },
+            "crawledsubs": {
+                "username": "zsq2018",
+                "gistid": "5af7f28e6efb5d79e8e179dba3dd4bfa",
+                "filename": "crawled_subs.json"
+            },
+            "crawledproxies": {
+                "username": "zsq2018",
+                "gistid": "5af7f28e6efb5d79e8e179dba3dd4bfa",
+                "filename": "crawled_proxies.json"
+            }
+        }
+    }
+}

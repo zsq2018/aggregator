@@ -1,0 +1,46 @@
+name: Aggregator Auto Run
+
+on:
+  schedule:
+    # 每天 06:00 / 12:00 / 18:00 / 00:00 UTC+8
+    - cron: '0 22,4,10,16 * * *'
+  workflow_dispatch:
+
+jobs:
+  aggregate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Make binaries executable
+        run: |
+          chmod +x subconverter/subconverter-linux-amd
+          chmod +x clash/clash-linux-amd
+
+      - name: Run aggregator
+        env:
+          PUSH_TOKEN: ${{ secrets.PUSH_TOKEN }}
+        run: |
+          python subscribe/process.py -s my-config.json -n 64 -t 8000 -r 3
+
+      - name: Upload output artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: node-output
+          path: output/
+          retention-days: 7
