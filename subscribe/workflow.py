@@ -61,6 +61,24 @@ def execute(task_conf):
     return proxies
 
 
+def liveness_fillter(proxies):
+    """Split proxies into check-needed and no-check lists"""
+    if not proxies:
+        return [], []
+    checks, nochecks = [], []
+    for p in proxies:
+        if not isinstance(p, dict):
+            continue
+        liveness = p.pop("liveness", True)
+        if liveness:
+            p.pop("sub", "")
+            checks.append(p)
+        else:
+            p.pop("sub", "")
+            nochecks.append(p)
+    return checks, nochecks
+
+
 def executewrapper(task_conf):
     if not task_conf:
         return (-1, [])
