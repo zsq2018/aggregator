@@ -27,10 +27,20 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Make binaries executable
+      - name: Download subconverter binary
         run: |
+          curl -sL -o subconverter/subconverter-linux-amd https://github.com/wzdnzd/aggregator/raw/main/subconverter/subconverter-linux-amd
           chmod +x subconverter/subconverter-linux-amd
+
+      - name: Download clash binary
+        run: |
+          curl -sL -o clash/clash-linux-amd https://github.com/wzdnzd/aggregator/raw/main/clash/clash-linux-amd
           chmod +x clash/clash-linux-amd
+
+      - name: Download data files
+        run: |
+          mkdir -p data
+          curl -sL -o data/Country.mmdb https://github.com/wzdnzd/aggregator/raw/main/clash/Country.mmdb
 
       - name: Run aggregator
         env:
