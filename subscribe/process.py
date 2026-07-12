@@ -4,8 +4,11 @@ import argparse
 import base64
 import json
 import os
+import subprocess
 import sys
+import time
 import urllib.parse
+import urllib.request
 
 import crawl
 import executable
@@ -16,87 +19,126 @@ import yaml
 from logger import logger
 
 PATH = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
+TEST_URL = "https://www.gstatic.com/generate_204"
 
 
 def proxy_to_v2ray_link(proxy):
-    """Convert a proxy dict to proper V2Ray subscription link"""
     ptype = proxy.get("type", "")
     name = proxy.get("name", "unknown")
     server = proxy.get("server", "")
     port = proxy.get("port", 443)
-
     try:
         if ptype == "vmess":
-            cfg = {
-                "v": "2",
-                "ps": name,
-                "add": server,
-                "port": int(port),
-                "id": proxy.get("uuid", ""),
-                "aid": int(proxy.get("alterId", 0)),
-                "net": proxy.get("network", "tcp"),
-                "type": "none",
-                "host": proxy.get("ws-opts", {}).get("headers", {}).get("Host", "") if isinstance(proxy.get("ws-opts"), dict) else "",
-                "path": proxy.get("ws-opts", {}).get("path", "") if isinstance(proxy.get("ws-opts"), dict) else "",
-                "tls": "tls" if proxy.get("tls") else "",
-            }
+            cfg = {"v": "2", "ps": name, "add": server, "port": int(port),
+                   "id": proxy.get("uuid", ""), "aid": int(proxy.get("alterId", 0)),
+                   "net": proxy.get("network", "tcp"), "type": "none",
+                   "host": "", "path": "", "tls": "tls" if proxy.get("tls") else ""}
+            if isinstance(proxy.get("ws-opts"), dict):
+                cfg["host"] = proxy["ws-opts"].get("headers", {}).get("Host", "")
+                cfg["path"] = proxy["ws-opts"].get("path", "")
             b64 = base64.urlsafe_b64encode(json.dumps(cfg, separators=(",", ":")).encode()).decode().rstrip("=")
             return f"vmess://{b64}"
-
         elif ptype == "trojan":
             pw = proxy.get("password", "")
             host = proxy.get("sni", server)
-            params = f"?sni={host}&allowInsecure=1" if host else "?allowInsecure=1"
-            frag = urllib.parse.quote(name, safe="")
-            return f"trojan://{urllib.parse.quote(pw, safe='')}@{server}:{port}{params}#{frag}"
-
+            return f"trojan://{urllib.parse.quote(pw, safe='')}@{server}:{port}?sni={host}&allowInsecure=1#{urllib.parse.quote(name, safe='')}"
         elif ptype == "ss":
             method = proxy.get("cipher", "aes-256-gcm")
             pw = proxy.get("password", "")
             b64 = base64.urlsafe_b64encode(f"{method}:{pw}".encode()).decode().rstrip("=")
-            frag = urllib.parse.quote(name, safe="")
-            return f"ss://{b64}@{server}:{port}#{frag}"
-
-        elif ptype == "http" or ptype == "https":
-            return ""
-
-        elif ptype == "hysteria2" or ptype == "hy2":
-            pw = proxy.get("password", "")
-            frag = urllib.parse.quote(name, safe="")
-            return f"hysteria2://{urllib.parse.quote(pw, safe='')}@{server}:{port}#{frag}"
-
-        elif ptype == "vless":
-            uuid = proxy.get("uuid", "")
-            net = proxy.get("network", "tcp")
-            frag = urllib.parse.quote(name, safe="")
-            return f"vless://{uuid}@{server}:{port}?type={net}&security=tls&sni={server}#{frag}"
-
+            return f"ss://{b64}@{server}:{port}#{urllib.parse.quote(name, safe='')}"
         elif ptype == "anytls":
             pw = proxy.get("password", "")
             host = proxy.get("sni", server) or proxy.get("servername", server)
-            frag = urllib.parse.quote(name, safe="")
-            return f"anytls://{urllib.parse.quote(pw, safe='')}@{server}:{port}?sni={host}&allowInsecure=0#{frag}"
-
+            return f"anytls://{urllib.parse.quote(pw, safe='')}@{server}:{port}?sni={host}#{urllib.parse.quote(name, safe='')}"
+        elif ptype == "hysteria2" or ptype == "hy2":
+            pw = proxy.get("password", "")
+            return f"hysteria2://{urllib.parse.quote(pw, safe='')}@{server}:{port}#{urllib.parse.quote(name, safe='')}"
+        elif ptype == "vless":
+            uuid = proxy.get("uuid", "")
+            net = proxy.get("network", "tcp")
+            return f"vless://{uuid}@{server}:{port}?type={net}&security=tls#{urllib.parse.quote(name, safe='')}"
         return ""
     except:
         return ""
 
 
-def quick_test(proxy):
-    """Simple TCP connect test"""
-    import socket
-    server = proxy.get("server", "")
-    port = proxy.get("port", 443)
-    if not server:
-        return False
+def test_with_clash(proxies, timeout_ms):
+    """Use clash to test proxies, returns only working ones"""
+    if not proxies:
+        return []
+
+    clash_workspace = os.path.join(PATH, "clash")
+    clash_config = os.path.join(clash_workspace, "config.yaml")
+    clash_bin = os.path.join(clash_workspace, "clash-linux-amd")
+
+    if not os.path.exists(clash_bin):
+        logger.error("clash binary not found, falling back to TCP test")
+        import socket
+        alive = []
+        for p in proxies:
+            try:
+                s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                s.settimeout(5)
+                s.connect((p.get("server",""), int(p.get("port",443))))
+                s.close()
+                alive.append(p)
+            except:
+                pass
+        return alive
+
+    # Build clash config
+    clash_conf = {
+        "port": 7890, "socks-port": 7891, "log-level": "silent",
+        "allow-lan": False, "mode": "rule",
+        "proxies": proxies,
+        "proxy-groups": [{
+            "name": "PROXY", "type": "select",
+            "proxies": [p["name"] for p in proxies]
+        }],
+        "rules": ["MATCH,PROXY"]
+    }
+
+    with open(clash_config, "w", encoding="utf8") as f:
+        yaml.dump(clash_conf, f, allow_unicode=True, default_flow_style=False)
+
     try:
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        s.settimeout(5)
-        s.connect((server, int(port)))
-        s.close()
-        return True
-    except:
-        return False
+        proc = subprocess.Popen([clash_bin, "-d", clash_workspace, "-f", clash_config],
+                                stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        time.sleep(5)
+
+        api_url = "http://127.0.0.1:9090"
+        alive_names = set()
+
+        for p in proxies:
+            name = p.get("name", "")
+            if not name:
+                continue
+            try:
+                encoded = urllib.parse.quote(name, safe="")
+                url = f"{api_url}/proxies/{encoded}/delay?url={TEST_URL}&timeout={timeout_ms}"
+                req = urllib.request.Request(url)
+                resp = urllib.request.urlopen(req, timeout=max(timeout_ms // 1000 + 2, 10))
+                if resp.getcode() == 200:
+                    data = json.loads(resp.read().decode())
+                    delay = data.get("delay", 0)
+                    if 0 < delay < 99999:
+                        alive_names.add(name)
+            except:
+                pass
+
+        proc.terminate()
+        alive = [p for p in proxies if p.get("name", "") in alive_names]
+        logger.info(f"clash test: {len(alive)} alive, {len(proxies) - len(alive)} dead")
+        return alive
+
+    except Exception as e:
+        logger.error(f"clash test error: {e}")
+        try:
+            proc.terminate()
+        except:
+            pass
+        return []
 
 
 def main():
@@ -132,7 +174,6 @@ def main():
     # Process all tasks
     all_proxies = []
     domains = config.get("domains", [])
-
     for item in domains:
         for sub in (item.get("sub", []) if isinstance(item.get("sub", []), list) else [item.get("sub", "")]):
             t = workflow.TaskConfig(name=item.get("name",""), bin_name=subconverter_bin, sub=sub,
@@ -147,15 +188,10 @@ def main():
 
     logger.info(f"total proxies collected: {len(all_proxies)}")
 
-    # TCP connect test
-    alive = []
-    for p in all_proxies:
-        if quick_test(p):
-            alive.append(p)
+    # Use clash for real protocol-level testing
+    alive = test_with_clash(all_proxies, args.timeout)
 
-    logger.info(f"tcp check: {len(alive)} alive, {len(all_proxies) - len(alive)} dead")
-
-    # Push outputs in correct format per target
+    # Push outputs
     for group_name, group_conf in groups.items():
         for target, item_key in group_conf.get("targets", {}).items():
             if item_key not in storage_items:
@@ -164,17 +200,10 @@ def main():
 
             if target == "clash":
                 output = yaml.dump({"proxies": alive}, allow_unicode=True, default_flow_style=False)
-
             elif target == "v2ray":
-                # Build proper V2Ray subscription: base64(one link per line)
-                links = []
-                for p in alive:
-                    link = proxy_to_v2ray_link(p)
-                    if link:
-                        links.append(link)
-                raw = "\n".join(links)
-                output = base64.b64encode(raw.encode()).decode()
-
+                links = [proxy_to_v2ray_link(p) for p in alive]
+                links = [l for l in links if l]
+                output = base64.b64encode("\n".join(links).encode()).decode()
             else:
                 output = json.dumps(alive, indent=2)
 
