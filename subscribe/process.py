@@ -29,28 +29,28 @@ def proxy_to_v2ray_link(proxy):
     port = proxy.get("port", 443)
     try:
         if ptype == "vmess":
-            cfg = {"v": "2", "ps": name, "add": server, "port": int(port),
-                   "id": proxy.get("uuid", ""), "aid": int(proxy.get("alterId", 0)),
-                   "net": proxy.get("network", "tcp"), "type": "none",
-                   "host": "", "path": "", "tls": "tls" if proxy.get("tls") else ""}
+            cfg = {"v":"2","ps":name,"add":server,"port":int(port),
+                   "id":proxy.get("uuid",""),"aid":int(proxy.get("alterId",0)),
+                   "net":proxy.get("network","tcp"),"type":"none","host":"","path":"",
+                   "tls":"tls" if proxy.get("tls") else ""}
             if isinstance(proxy.get("ws-opts"), dict):
-                cfg["host"] = proxy["ws-opts"].get("headers", {}).get("Host", "")
-                cfg["path"] = proxy["ws-opts"].get("path", "")
-            b64 = base64.urlsafe_b64encode(json.dumps(cfg, separators=(",", ":")).encode()).decode().rstrip("=")
+                cfg["host"] = proxy["ws-opts"].get("headers",{}).get("Host","")
+                cfg["path"] = proxy["ws-opts"].get("path","")
+            b64 = base64.urlsafe_b64encode(json.dumps(cfg,separators=(",",":")).encode()).decode().rstrip("=")
             return f"vmess://{b64}"
         elif ptype == "trojan":
-            pw = proxy.get("password", "")
-            host = proxy.get("sni", server)
-            return f"trojan://{urllib.parse.quote(pw, safe='')}@{server}:{port}?sni={host}&allowInsecure=1#{urllib.parse.quote(name, safe='')}"
+            pw = proxy.get("password","")
+            host = proxy.get("sni",server)
+            return f"trojan://{urllib.parse.quote(pw,safe='')}@{server}:{port}?sni={host}&allowInsecure=1#{urllib.parse.quote(name,safe='')}"
         elif ptype == "ss":
-            method = proxy.get("cipher", "aes-256-gcm")
-            pw = proxy.get("password", "")
-            b64 = base64.urlsafe_b64encode(f"{method}:{pw}".encode()).decode().rstrip("=")
-            return f"ss://{b64}@{server}:{port}#{urllib.parse.quote(name, safe='')}"
+            m = proxy.get("cipher","aes-256-gcm")
+            pw = proxy.get("password","")
+            b64 = base64.urlsafe_b64encode(f"{m}:{pw}".encode()).decode().rstrip("=")
+            return f"ss://{b64}@{server}:{port}#{urllib.parse.quote(name,safe='')}"
         elif ptype == "anytls":
-            pw = proxy.get("password", "")
-            host = proxy.get("sni", server) or proxy.get("servername", server)
-            return f"anytls://{urllib.parse.quote(pw, safe='')}@{server}:{port}?sni={host}#{urllib.parse.quote(name, safe='')}"
+            pw = proxy.get("password","")
+            host = proxy.get("sni",server) or proxy.get("servername",server)
+            return f"anytls://{urllib.parse.quote(pw,safe='')}@{server}:{port}?sni={host}#{urllib.parse.quote(name,safe='')}"
         return ""
     except:
         return ""
@@ -59,115 +59,111 @@ def proxy_to_v2ray_link(proxy):
 def test_with_clash(proxies, timeout_ms):
     if not proxies:
         return []
-    clash_workspace = os.path.join(PATH, "clash")
-    clash_config = os.path.join(clash_workspace, "config.yaml")
-    clash_bin = os.path.join(clash_workspace, "clash-linux-amd")
-    if not os.path.exists(clash_bin):
-        logger.error(f"clash not found, fallback TCP test")
+    cw = os.path.join(PATH, "clash")
+    cf = os.path.join(cw, "config.yaml")
+    cb = os.path.join(cw, "clash-linux-amd")
+    if not os.path.exists(cb):
+        logger.error("no clash binary, doing TCP test")
         import socket as sk
         alive = []
         for p in proxies:
             try:
                 s = sk.socket(sk.AF_INET, sk.SOCK_STREAM)
                 s.settimeout(3)
-                s.connect((p.get("server",""), int(p.get("port",443))))
+                s.connect((p["server"], int(p["port"])))
                 s.close()
                 alive.append(p)
             except:
                 pass
         return alive
-    clash_conf = {"port": 7890, "log-level": "silent", "mode": "rule",
-                  "proxies": proxies,
-                  "proxy-groups": [{"name": "PROXY", "type": "select", "proxies": [p["name"] for p in proxies]}],
-                  "rules": ["MATCH,PROXY"]}
-    with open(clash_config, "w") as f:
-        yaml.dump(clash_conf, f, allow_unicode=True)
+    cc = {"port":7890,"log-level":"info","mode":"rule",
+          "proxies":proxies,
+          "proxy-groups":[{"name":"PROXY","type":"select","proxies":[p["name"] for p in proxies]}],
+          "rules":["MATCH,PROXY"]}
+    with open(cf,"w") as f:
+        yaml.dump(cc,f,allow_unicode=True)
+    proc = None
     try:
-        proc = subprocess.Popen([clash_bin, "-d", clash_workspace, "-f", clash_config],
-                                stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        time.sleep(5)
+        proc = subprocess.Popen([cb,"-d",cw,"-f",cf],stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+        # Wait for clash to start - check API health
+        import socket
+        for i in range(10):
+            time.sleep(2)
+            try:
+                s = socket.create_connection(("127.0.0.1", 7890), timeout=1)
+                s.close()
+                logger.info("clash port 7890 ready")
+                break
+            except:
+                logger.info(f"waiting clash... {i+1}/10")
         if proc.poll() is not None:
-            out, err = proc.communicate(timeout=2)
-            logger.error(f"clash died: {err.decode()[:200]}")
+            o,e = proc.communicate(timeout=2)
+            logger.error(f"clash exited: {e.decode()[:500]}")
             return []
-        alive_names = set()
+        alive = []
         for p in proxies:
             try:
-                enc = urllib.parse.quote(p["name"], safe="")
-                req = urllib.request.Request(f"http://127.0.0.1:9090/proxies/{enc}/delay?url={TEST_URL}&timeout={timeout_ms}")
-                resp = urllib.request.urlopen(req, timeout=max(timeout_ms//1000+2,10))
+                enc = urllib.parse.quote(p["name"],safe="")
+                to = max(timeout_ms // 1000, 3) * 1000
+                req = urllib.request.Request(
+                    f"http://127.0.0.1:9090/proxies/{enc}/delay?url={TEST_URL}&timeout={to}")
+                resp = urllib.request.urlopen(req, timeout=max(timeout_ms//1000+5,15))
                 if resp.getcode() == 200:
-                    d = json.loads(resp.read().decode()).get("delay", 0)
+                    d = json.loads(resp.read().decode()).get("delay",0)
                     if 0 < d < 99999:
-                        alive_names.add(p["name"])
-            except:
+                        p["delay"] = d
+                        alive.append(p)
+            except Exception as ex:
                 pass
         proc.terminate()
-        alive = [p for p in proxies if p["name"] in alive_names]
-        logger.info(f"clash test: {len(alive)} alive / {len(proxies)}")
+        logger.info(f"clash: {len(alive)}/{len(proxies)} alive")
         return alive
     except Exception as e:
         logger.error(f"clash error: {e}")
+        import traceback
+        logger.error(traceback.format_exc())
         try: proc.terminate()
         except: pass
         return []
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Aggregator")
-    parser.add_argument("-s", "--server", default="", help="config")
-    parser.add_argument("-r", "--retry", type=int, default=3)
-    parser.add_argument("-t", "--timeout", type=int, default=5000)
-    args = parser.parse_args()
-
-    server = args.server or os.environ.get("SUBSCRIBE_CONF", "")
-    if not server:
-        logger.error("no config"); sys.exit(1)
-
-    config = json.load(open(server))
-    sc = push.PushConfig.from_dict(config.get("storage", {}))
-    if not sc:
-        logger.error("bad storage"); sys.exit(1)
-    pushtool = push.get_instance(sc)
-    items = config.get("storage", {}).get("items", {})
-    groups = config.get("groups", {})
-    _, subconverter_bin = executable.which_bin()
-
-    # Crawl
-    crawled = []
-    cc = config.get("crawl", {})
-    if cc.get("enable", True):
-        crawled = crawl.batch_crawl(cc, config.get("domains", []), sc)
-
-    # Fetch
-    all_px = []
-    for item in config.get("domains", []):
-        for sub in (item.get("sub", []) if isinstance(item.get("sub"), list) else [item.get("sub", "")]):
-            t = workflow.TaskConfig(name=item.get("name",""), bin_name=subconverter_bin, sub=sub,
-                                    retry=args.retry, rate=item.get("rate",5.0))
-            all_px.extend(workflow.execute(t))
-    for i, u in enumerate(crawled):
-        t = workflow.TaskConfig(name=f"crawled-{i}", bin_name=subconverter_bin, sub=u, retry=args.retry)
-        all_px.extend(workflow.execute(t))
-    logger.info(f"collected: {len(all_px)}")
-
-    alive = test_with_clash(all_px, args.timeout)
-
-    # Push
-    for gname, gconf in groups.items():
-        for target, key in gconf.get("targets", {}).items():
-            if key not in items:
-                continue
+    p = argparse.ArgumentParser()
+    p.add_argument("-s","--server",default="")
+    p.add_argument("-r","--retry",type=int,default=3)
+    p.add_argument("-t","--timeout",type=int,default=5000)
+    args = p.parse_args()
+    s = args.server or os.environ.get("SUBSCRIBE_CONF","")
+    if not s: logger.error("no config"); sys.exit(1)
+    cfg = json.load(open(s))
+    sc = push.PushConfig.from_dict(cfg.get("storage",{}))
+    if not sc: logger.error("bad storage"); sys.exit(1)
+    pt = push.get_instance(sc)
+    items = cfg.get("storage",{}).get("items",{})
+    groups = cfg.get("groups",{})
+    _,subc = executable.which_bin()
+    cc = cfg.get("crawl",{})
+    if cc.get("enable",True):
+        crawl.batch_crawl(cc,cfg.get("domains",[]),sc)
+    px = []
+    for item in cfg.get("domains",[]):
+        for sub in (item.get("sub",[]) if isinstance(item.get("sub"),list) else [item.get("sub","")]):
+            t = workflow.TaskConfig(name=item.get("name",""),bin_name=subc,sub=sub,retry=args.retry,rate=item.get("rate",5.0))
+            px.extend(workflow.execute(t))
+    logger.info(f"collected: {len(px)}")
+    alive = test_with_clash(px, args.timeout)
+    for gname,gconf in groups.items():
+        for target,key in gconf.get("targets",{}).items():
+            if key not in items: continue
             if target == "clash":
-                out = yaml.dump({"proxies": alive}, allow_unicode=True)
+                out = yaml.dump({"proxies":alive},allow_unicode=True)
             elif target == "v2ray":
                 links = [proxy_to_v2ray_link(p) for p in alive if proxy_to_v2ray_link(p)]
                 out = base64.b64encode("\n".join(links).encode()).decode()
             else:
-                out = json.dumps(alive, indent=2)
-            pushtool.push_to(content=out, config=items[key], group=f"{gname}::{target}")
+                out = json.dumps(alive,indent=2)
+            pt.push_to(content=out,config=items[key],group=f"{gname}::{target}")
             logger.info(f"done: {gname}/{target} = {len(alive)}")
 
-
-if __name__ == "__main__":
+if __name__=="__main__":
     main()
