@@ -2,7 +2,6 @@ name: Aggregator Auto Run
 
 on:
   schedule:
-    # 每天 06:00 / 12:00 / 18:00 / 00:00 UTC+8
     - cron: '0 22,4,10,16 * * *'
   workflow_dispatch:
 
@@ -27,32 +26,11 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Prepare directories
-        run: |
-          mkdir -p clash data subconverter
-
-      - name: Download subconverter binary
-        run: |
-          curl -sL -o subconverter/subconverter-linux-amd \
-            https://github.com/wzdnzd/aggregator/raw/main/subconverter/subconverter-linux-amd
-          chmod +x subconverter/subconverter-linux-amd
-
-      - name: Download clash binary
-        run: |
-          curl -sL -o clash/clash-linux-amd \
-            https://github.com/wzdnzd/aggregator/raw/main/clash/clash-linux-amd
-          chmod +x clash/clash-linux-amd
-
-      - name: Download Country.mmdb
-        run: |
-          curl -sL -o data/Country.mmdb \
-            https://github.com/wzdnzd/aggregator/raw/main/clash/Country.mmdb
-
       - name: Run aggregator
         env:
           PUSH_TOKEN: ${{ secrets.PUSH_TOKEN }}
         run: |
-          python subscribe/process.py -s my-config.json -n 64 -t 8000 -r 3
+          python subscribe/process.py -s my-config.json -r 3 -t 8000
 
       - name: Upload output artifacts
         uses: actions/upload-artifact@v4
