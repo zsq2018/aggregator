@@ -4,11 +4,8 @@ import argparse
 import base64
 import json
 import os
-import subprocess
 import sys
-import time
 import urllib.parse
-import urllib.request
 
 import crawl
 import executable
@@ -19,7 +16,6 @@ import yaml
 from logger import logger
 
 PATH = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
-TEST_URL = "https://www.gstatic.com/generate_204"
 
 
 def proxy_to_v2ray_link(proxy):
@@ -51,80 +47,27 @@ def proxy_to_v2ray_link(proxy):
             pw = proxy.get("password","")
             host = proxy.get("sni",server) or proxy.get("servername",server)
             return f"anytls://{urllib.parse.quote(pw,safe='')}@{server}:{port}?sni={host}#{urllib.parse.quote(name,safe='')}"
+        elif ptype == "http" or ptype == "https":
+            return ""
         return ""
     except:
         return ""
 
 
-def test_with_clash(proxies, timeout_ms):
-    if not proxies:
-        return []
-    cw = os.path.join(PATH, "clash")
-    cf = os.path.join(cw, "config.yaml")
-    cb = os.path.join(cw, "clash-linux-amd")
-    if not os.path.exists(cb):
-        logger.error("no clash binary, doing TCP test")
-        import socket as sk
-        alive = []
-        for p in proxies:
-            try:
-                s = sk.socket(sk.AF_INET, sk.SOCK_STREAM)
-                s.settimeout(3)
-                s.connect((p["server"], int(p["port"])))
-                s.close()
-                alive.append(p)
-            except:
-                pass
-        return alive
-    cc = {"port":7890,"log-level":"info","mode":"rule",
-          "proxies":proxies,
-          "proxy-groups":[{"name":"PROXY","type":"select","proxies":[p["name"] for p in proxies]}],
-          "rules":["MATCH,PROXY"]}
-    with open(cf,"w") as f:
-        yaml.dump(cc,f,allow_unicode=True)
-    proc = None
-    try:
-        proc = subprocess.Popen([cb,"-d",cw,"-f",cf],stdout=subprocess.PIPE,stderr=subprocess.PIPE)
-        # Wait for clash to start - check API health
-        import socket
-        for i in range(10):
-            time.sleep(2)
-            try:
-                s = socket.create_connection(("127.0.0.1", 7890), timeout=1)
-                s.close()
-                logger.info("clash port 7890 ready")
-                break
-            except:
-                logger.info(f"waiting clash... {i+1}/10")
-        if proc.poll() is not None:
-            o,e = proc.communicate(timeout=2)
-            logger.error(f"clash exited: {e.decode()[:500]}")
-            return []
-        alive = []
-        for p in proxies:
-            try:
-                enc = urllib.parse.quote(p["name"],safe="")
-                to = max(timeout_ms // 1000, 3) * 1000
-                req = urllib.request.Request(
-                    f"http://127.0.0.1:9090/proxies/{enc}/delay?url={TEST_URL}&timeout={to}")
-                resp = urllib.request.urlopen(req, timeout=max(timeout_ms//1000+5,15))
-                if resp.getcode() == 200:
-                    d = json.loads(resp.read().decode()).get("delay",0)
-                    if 0 < d < 99999:
-                        p["delay"] = d
-                        alive.append(p)
-            except Exception as ex:
-                pass
-        proc.terminate()
-        logger.info(f"clash: {len(alive)}/{len(proxies)} alive")
-        return alive
-    except Exception as e:
-        logger.error(f"clash error: {e}")
-        import traceback
-        logger.error(traceback.format_exc())
-        try: proc.terminate()
-        except: pass
-        return []
+def test_tcp(proxies, timeout_ms):
+    import socket
+    alive = []
+    for p in proxies:
+        try:
+            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            s.settimeout(max(timeout_ms // 1000, 3))
+            s.connect((p.get("server",""), int(p.get("port",443))))
+            s.close()
+            alive.append(p)
+        except:
+            pass
+    logger.info(f"tcp: {len(alive)}/{len(proxies)} alive")
+    return alive
 
 
 def main():
@@ -142,21 +85,35 @@ def main():
     items = cfg.get("storage",{}).get("items",{})
     groups = cfg.get("groups",{})
     _,subc = executable.which_bin()
+
+    # Crawl
+    crawled = []
     cc = cfg.get("crawl",{})
     if cc.get("enable",True):
-        crawl.batch_crawl(cc,cfg.get("domains",[]),sc)
+        crawled = crawl.batch_crawl(cc, cfg.get("domains",[]), sc)
+
+    # Fetch proxies from domains
     px = []
     for item in cfg.get("domains",[]):
         for sub in (item.get("sub",[]) if isinstance(item.get("sub"),list) else [item.get("sub","")]):
-            t = workflow.TaskConfig(name=item.get("name",""),bin_name=subc,sub=sub,retry=args.retry,rate=item.get("rate",5.0))
+            t = workflow.TaskConfig(name=item.get("name",""),bin_name=subc,sub=sub,
+                                    retry=args.retry,rate=item.get("rate",5.0))
             px.extend(workflow.execute(t))
+
+    # Fetch from crawled subscriptions
+    for i, u in enumerate(crawled):
+        t = workflow.TaskConfig(name=f"crawl-{i}", bin_name=subc, sub=u, retry=args.retry)
+        px.extend(workflow.execute(t))
+
     logger.info(f"collected: {len(px)}")
-    alive = test_with_clash(px, args.timeout)
+    alive = test_tcp(px, args.timeout)
+
+    # Push
     for gname,gconf in groups.items():
         for target,key in gconf.get("targets",{}).items():
             if key not in items: continue
             if target == "clash":
-                out = yaml.dump({"proxies":alive},allow_unicode=True)
+                out = yaml.dump({"proxies":alive},allow_unicode=True,default_flow_style=False)
             elif target == "v2ray":
                 links = [proxy_to_v2ray_link(p) for p in alive if proxy_to_v2ray_link(p)]
                 out = base64.b64encode("\n".join(links).encode()).decode()
