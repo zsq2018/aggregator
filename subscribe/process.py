@@ -55,21 +55,19 @@ def main():
     storage_items = config.get("storage", {}).get("items", {})
 
     # Crawl
+    crawled_subs = []
     crawl_config = config.get("crawl", {})
     if crawl_config.get("enable", True):
-        crawl.batch_crawl(crawl_config, config.get("domains", []), storage_conf)
+        crawled_subs = crawl.batch_crawl(crawl_config, config.get("domains", []), storage_conf)
 
-    # Process domains
+    # Build task list from both domains and crawled subs
     domains = config.get("domains", [])
-    if not domains:
-        logger.error("no domains configured")
-        return
-
     groups = config.get("groups", {})
     _, subconverter_bin = executable.which_bin()
 
-    # Execute tasks
     all_proxies = []
+
+    # Process configured domains
     for item in domains:
         name = item.get("name", "")
         sub_list = item.get("sub", [])
@@ -87,6 +85,18 @@ def main():
             proxies = workflow.execute(task)
             all_proxies.extend(proxies)
 
+    # Process crawled subscriptions
+    for i, sub_url in enumerate(crawled_subs):
+        task = workflow.TaskConfig(
+            name=f"crawled-{i}", bin_name=subconverter_bin,
+            sub=sub_url, retry=args.retry,
+            liveness=True, ignorede=True,
+        )
+        proxies = workflow.execute(task)
+        all_proxies.extend(proxies)
+
+    logger.info(f"total proxies collected: {len(all_proxies)}")
+
     # Filter and test
     check_list, no_check_list = workflow.liveness_fillter(all_proxies)
 
@@ -94,7 +104,7 @@ def main():
         clash_workspace = os.path.join(PATH, "clash")
         clash_config = os.path.join(clash_workspace, "config.yaml")
         clash_conf = {"port": 7890, "log-level": "silent", "mode": "rule",
-                      "proxies": check_list, 
+                      "proxies": check_list,
                       "proxy-groups": [{"name": "proxy", "type": "select",
                                         "proxies": [p["name"] for p in check_list]}],
                       "rules": ["MATCH,proxy"]}
@@ -117,7 +127,7 @@ def main():
     else:
         all_alive = no_check_list
 
-    # Push
+    # Push to Gist
     for group_name, group_conf in groups.items():
         targets = group_conf.get("targets", {})
         for target, item_key in targets.items():
@@ -125,8 +135,7 @@ def main():
                 logger.error(f"missing storage for {group_name} -> {target}")
                 continue
             push_conf = storage_items[item_key]
-            output_conf = {"proxies": all_alive}
-            output_content = yaml.dump(output_conf, allow_unicode=True) if target == "clash" else json.dumps(all_alive, ensure_ascii=False, indent=2)
+            output_content = yaml.dump({"proxies": all_alive}, allow_unicode=True) if target == "clash" else json.dumps(all_alive, ensure_ascii=False, indent=2)
             pushtool.push_to(content=output_content, config=push_conf, group=f"{group_name}::{target}")
             logger.info(f"group [{group_name}] done, count: {len(all_alive)}, target: {target}")
 
