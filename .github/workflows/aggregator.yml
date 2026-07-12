@@ -24,22 +24,13 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
-
-      - name: Download clash binary
-        run: |
-          mkdir -p clash data
-          curl -sL -o clash/clash-linux-amd \
-            https://github.com/wzdnzd/aggregator/raw/main/clash/clash-linux-amd
-          chmod +x clash/clash-linux-amd
-          curl -sL -o data/Country.mmdb \
-            https://github.com/wzdnzd/aggregator/raw/main/clash/Country.mmdb
+          pip install -r requirements.txt pyyaml
 
       - name: Run aggregator
         env:
           PUSH_TOKEN: ${{ secrets.PUSH_TOKEN }}
         run: |
-          python subscribe/process.py -s my-config.json -r 3 -t 8000
+          python subscribe/process.py -s my-config.json -r 3 -t 3000
 
       - name: Upload output artifacts
         uses: actions/upload-artifact@v4
