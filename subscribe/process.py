@@ -4,6 +4,7 @@ import argparse
 import base64
 import json
 import os
+import socket
 import subprocess
 import sys
 import time
@@ -56,6 +57,20 @@ def proxy_to_v2ray_link(proxy):
         return ""
 
 
+def test_tcp(proxies, timeout_s):
+    alive = []
+    for p in proxies:
+        try:
+            s=socket.socket(socket.AF_INET,socket.SOCK_STREAM)
+            s.settimeout(timeout_s)
+            s.connect((p["server"],int(p["port"])))
+            s.close()
+            alive.append(p)
+        except:
+            pass
+    return alive
+
+
 def main():
     p = argparse.ArgumentParser()
     p.add_argument("-s","--server",default="")
@@ -72,18 +87,15 @@ def main():
     groups = cfg.get("groups",{})
     _,subc = executable.which_bin()
 
-    # Crawl
     crawled = []
     cc = cfg.get("crawl",{})
     if cc.get("enable",True):
         crawled = crawl.batch_crawl(cc, cfg.get("domains",[]), sc)
 
-    # Fetch all proxies
     px = []
     for item in cfg.get("domains",[]):
         for sub in (item.get("sub",[]) if isinstance(item.get("sub"),list) else [item.get("sub","")]):
-            t = workflow.TaskConfig(name=item.get("name",""),bin_name=subc,sub=sub,
-                                    retry=args.retry,rate=item.get("rate",5.0))
+            t = workflow.TaskConfig(name=item.get("name",""),bin_name=subc,sub=sub,retry=args.retry,rate=item.get("rate",5.0))
             try: px.extend(workflow.execute(t))
             except: pass
     for i, u in enumerate(crawled):
@@ -92,12 +104,11 @@ def main():
         except: pass
     logger.info(f"collected: {len(px)}")
 
-    # Test with clash
     alive = []
-    cw = os.path.join(PATH, "clash")
-    cf = os.path.join(cw, "config.yaml")
-    cb = os.path.join(cw, "clash-linux-amd")
-    if os.path.exists(cb):
+    cb = os.path.join(PATH,"clash","clash-linux-amd")
+    if os.path.exists(cb) and len(px) > 0:
+        cw = os.path.join(PATH,"clash")
+        cf = os.path.join(cw,"config.yaml")
         cc = {"port":7890,"log-level":"silent","mode":"rule",
               "proxies":px,
               "proxy-groups":[{"name":"PROXY","type":"select","proxies":[p["name"] for p in px]}],
@@ -118,25 +129,15 @@ def main():
                             if 0<d<99999: alive.append(p)
                     except: pass
                 proc.terminate()
-            else:
-                o,e = proc.communicate(timeout=3)
-                logger.error(f"clash died early: {e.decode()[:200]}")
-        except Exception as ex:
-            logger.error(f"clash: {ex}")
-            try: proc.terminate()
-            except: pass
-    else:
-        # TCP fallback
-        import socket
-        for p in px:
-            try:
-                s=socket.socket(socket.AF_INET,socket.SOCK_STREAM)
-                s.settimeout(3); s.connect((p["server"],int(p["port"]))); s.close()
-                alive.append(p)
-            except: pass
+        except: pass
+
+    # Clash returned 0 but we have proxies: fallback to TCP
+    if len(alive) == 0 and len(px) > 0:
+        logger.info("clash returned 0, fallback to TCP test")
+        alive = test_tcp(px, 3)
+    
     logger.info(f"tested: {len(alive)}/{len(px)} alive")
 
-    # Push to Gist
     for gname,gconf in groups.items():
         for target,key in gconf.get("targets",{}).items():
             if key not in items: continue
