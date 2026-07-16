@@ -1,4 +1,707 @@
-# Clash Verge 订阅配置
-# 来源: https://github.com/Mahdi0024/ProxyCollector
-# 生成时间: 2026-07-16
-
+mode: Rule
+port: 7890
+proxies:
+- name: 🇺🇸 US 1
+  password: bpb-trojan
+  port: 443
+  server: vless.herogoing.top
+  skip-cert-verify: true
+  sni: vless.herogoing.top
+  type: trojan
+  udp: true
+- cipher: aes-128-gcm
+  name: 🇺🇸 US 7
+  port: 443
+  server: 173.244.56.6
+  type: ss
+- cipher: aes-128-gcm
+  name: 🇺🇸 US 8
+  port: 443
+  server: 173.244.56.9
+  type: ss
+- cipher: aes-128-gcm
+  name: 🇺🇸 US 9
+  port: 443
+  server: 156.146.38.168
+  type: ss
+- cipher: aes-128-gcm
+  name: 🇺🇸 US 10
+  port: 443
+  server: 156.146.38.169
+  type: ss
+- cipher: aes-128-gcm
+  name: 🇺🇸 US 11
+  port: 443
+  server: 156.146.38.170
+  type: ss
+- cipher: aes-128-gcm
+  name: 🇺🇸 US 12
+  port: 443
+  server: 156.146.38.167
+  type: ss
+- name: 🇺🇸 US 13
+  port: 443
+  server: 47.253.226.114
+  type: vless
+  udp: true
+  uuid: 055a1ce8-2a16-4a0d-a2c2-22826c9b2413
+- name: 🇺🇸 US 14
+  password: '3632736327'
+  port: 3480
+  server: us04031316.tmdsb.org
+  skip-cert-verify: true
+  sni: us04031316.tmdsb.org
+  type: trojan
+  udp: true
+- name: 🇺🇸 US 18
+  password: '3632736327'
+  port: 2888
+  server: us04021322.tmdsb.org
+  skip-cert-verify: true
+  sni: us04021322.tmdsb.org
+  type: trojan
+  udp: true
+- cipher: aes-128-gcm
+  name: 🇺🇸 US 20
+  port: 443
+  server: 37.19.198.244
+  type: ss
+- cipher: aes-128-gcm
+  name: 🇺🇸 US 22
+  port: 443
+  server: 37.19.198.160
+  type: ss
+- cipher: aes-128-gcm
+  name: 🇺🇸 US 24
+  port: 443
+  server: 37.19.198.243
+  type: ss
+- cipher: aes-128-gcm
+  name: 🇺🇸 US 25
+  port: 443
+  server: 37.19.198.236
+  type: ss
+- alterId: 0
+  cipher: auto
+  name: 🇺🇸 US 26
+  port: 18000
+  server: 38.110.1.246
+  type: vmess
+  uuid: f8c8dc3d-0d37-46b0-8b34-a7232882fcfe
+- cipher: aes-256-cfb
+  name: 🇺🇸 US 27
+  port: 443
+  server: 13.59.31.133
+  type: ss
+- cipher: aes-256-cfb
+  name: 🇺🇸 US 28
+  port: 443
+  server: 3.145.57.90
+  type: ss
+- name: 🇩🇪 DE 1
+  password: dh-Ws-YoJIgTYLZ-A5VljeduVse-vhDl7Q
+  port: 443
+  server: 185.137.157.135
+  skip-cert-verify: true
+  sni: 185.137.157.135
+  type: trojan
+  udp: true
+- name: 🇩🇪 DE 2
+  password: dh-Ws-YoJIgTYLZ-A5VljeduVse-vhDl7Q
+  port: 443
+  server: 185.137.157.128
+  skip-cert-verify: true
+  sni: 185.137.157.128
+  type: trojan
+  udp: true
+- name: 🇩🇪 DE 3
+  password: dh-Ws-YoJIgTYLZ-A5VljeduVse-vhDl7Q
+  port: 443
+  server: 185.137.157.142
+  skip-cert-verify: true
+  sni: 185.137.157.142
+  type: trojan
+  udp: true
+- name: 🇩🇪 DE 4
+  password: dh-Ws-YoJIgTYLZ-A5VljeduVse-vhDl7Q
+  port: 443
+  server: 185.137.157.149
+  skip-cert-verify: true
+  sni: 185.137.157.149
+  type: trojan
+  udp: true
+- name: 🇩🇪 DE 5
+  password: KV63147582
+  port: 443
+  server: together-insect.rooster465.autos
+  skip-cert-verify: true
+  sni: together-insect.rooster465.autos
+  type: trojan
+  udp: true
+- name: 🇩🇪 DE 6
+  password: dh-Ws-YoJIgTYLZ-A5VljeduVse-vhDl7Q
+  port: 443
+  server: 185.137.157.145
+  skip-cert-verify: true
+  sni: 185.137.157.145
+  type: trojan
+  udp: true
+- name: 🇩🇪 DE 10
+  password: KV63147582
+  port: 443
+  server: evolving-baboon.rooster465.autos
+  skip-cert-verify: true
+  sni: evolving-baboon.rooster465.autos
+  type: trojan
+  udp: true
+- name: 🇩🇪 DE 14
+  password: dh-Ws-YoJIgTYLZ-A5VljeduVse-vhDl7Q
+  port: 443
+  server: 185.137.157.140
+  skip-cert-verify: true
+  sni: 185.137.157.140
+  type: trojan
+  udp: true
+- name: 🇩🇪 DE 20
+  password: dh-Ws-YoJIgTYLZ-A5VljeduVse-vhDl7Q
+  port: 443
+  server: 185.137.157.151
+  skip-cert-verify: true
+  sni: 185.137.157.151
+  type: trojan
+  udp: true
+- name: 🇩🇪 DE 22
+  password: dh-Ws-YoJIgTYLZ-A5VljeduVse-vhDl7Q
+  port: 443
+  server: 185.137.157.138
+  skip-cert-verify: true
+  sni: 185.137.157.138
+  type: trojan
+  udp: true
+- name: 🇩🇪 DE 25
+  password: dh-Ws-YoJIgTYLZ-A5VljeduVse-vhDl7Q
+  port: 443
+  server: 185.137.157.156
+  skip-cert-verify: true
+  sni: 185.137.157.156
+  type: trojan
+  udp: true
+- name: 🇩🇪 DE 42
+  password: t1k5znTjT8
+  port: 4433
+  server: sp.cloudv.qzz.io
+  skip-cert-verify: true
+  sni: sp.cloudv.qzz.io
+  type: trojan
+  udp: true
+- name: 🇩🇪 DE 43
+  password: wXHhqoeF2OCjBkxci1FyVzjQonQcb26MdTKYRAUkqUU=
+  port: 8080
+  server: jazzghost.com
+  skip-cert-verify: true
+  sni: bale.ai
+  type: trojan
+  udp: true
+- cipher: aes-256-gcm
+  name: 🇩🇪 DE 44
+  port: 8008
+  server: 185.226.172.8
+  type: ss
+- name: 🇳🇱 NL 1
+  password: XG59623478
+  port: 443
+  server: renewed-chigger.rooster465.autos
+  skip-cert-verify: true
+  sni: renewed-chigger.rooster465.autos
+  type: trojan
+  udp: true
+- cipher: aes-128-cfb
+  name: 🇳🇱 NL 4
+  port: 443
+  server: 109.201.152.181
+  type: ss
+- name: 🇳🇱 NL 5
+  password: KV63147582
+  port: 443
+  server: game-firefly.rooster465.autos
+  skip-cert-verify: true
+  sni: game-firefly.rooster465.autos
+  type: trojan
+  udp: true
+- cipher: aes-128-gcm
+  name: 🇳🇱 NL 6
+  port: 443
+  server: 158.173.20.171
+  type: ss
+- cipher: chacha20-ietf-poly1305
+  name: 🇳🇱 NL 7
+  port: 8080
+  server: 82.38.31.47
+  type: ss
+- cipher: chacha20-ietf-poly1305
+  name: 🇳🇱 NL 8
+  port: 443
+  server: 82.38.31.57
+  type: ss
+- cipher: chacha20-ietf-poly1305
+  name: 🇳🇱 NL 9
+  port: 8080
+  server: 82.38.31.7
+  type: ss
+- cipher: aes-256-gcm
+  name: 🇵🇱 PL 1
+  port: 5600
+  server: 92.118.205.211
+  type: ss
+- name: 🇵🇱 PL 2
+  password: PI36027154
+  port: 443
+  server: upright-hamster.rooster465.autos
+  skip-cert-verify: true
+  sni: upright-hamster.rooster465.autos
+  type: trojan
+  udp: true
+- name: 🇵🇱 PL 3
+  password: PI36027154
+  port: 443
+  server: 62.112.222.26
+  skip-cert-verify: true
+  sni: upright-hamster.rooster465.autos
+  type: trojan
+  udp: true
+- name: 🇵🇱 PL 4
+  password: e0847a89a1664221ad7dbfa85619afc3
+  port: 58371
+  server: 144.31.113.56
+  skip-cert-verify: true
+  sni: ymail.com
+  type: trojan
+  udp: true
+- cipher: aes-128-gcm
+  name: 🇯🇵 JP 1
+  port: 443
+  server: 149.22.87.204
+  type: ss
+- cipher: aes-128-gcm
+  name: 🇯🇵 JP 2
+  port: 443
+  server: 149.22.87.241
+  type: ss
+- cipher: aes-128-gcm
+  name: 🇯🇵 JP 3
+  port: 443
+  server: 149.22.87.240
+  type: ss
+- name: 🇯🇵 JP 4
+  password: PI36027154
+  port: 443
+  server: faithful-clam.rooster465.autos
+  skip-cert-verify: true
+  sni: faithful-clam.rooster465.autos
+  type: trojan
+  udp: true
+- name: 🇯🇵 JP 5
+  password: PI36027154
+  port: 443
+  server: 52.194.192.245
+  skip-cert-verify: true
+  sni: exciting-grizzly.rooster465.autos
+  type: trojan
+  udp: true
+- name: 🇯🇵 JP 6
+  password: PI36027154
+  port: 443
+  server: exciting-grizzly.rooster465.autos
+  skip-cert-verify: true
+  sni: exciting-grizzly.rooster465.autos
+  type: trojan
+  udp: true
+- name: 🇯🇵 JP 7
+  password: PI36027154
+  port: 443
+  server: 43.207.192.70
+  skip-cert-verify: true
+  sni: stirred-buck.rooster465.autos
+  type: trojan
+  udp: true
+- name: 🇯🇵 JP 11
+  password: PI36027154
+  port: 443
+  server: stirred-buck.rooster465.autos
+  skip-cert-verify: true
+  sni: stirred-buck.rooster465.autos
+  type: trojan
+  udp: true
+- name: 🇯🇵 JP 12
+  password: tsuchiya
+  port: 443
+  server: 161.34.39.108
+  skip-cert-verify: true
+  sni: aa.ccmusic.jp
+  type: trojan
+  udp: true
+- name: 🇯🇵 JP 13
+  password: PI36027154
+  port: 443
+  server: 18.179.120.96
+  skip-cert-verify: true
+  sni: faithful-clam.rooster465.autos
+  type: trojan
+  udp: true
+- name: 🇲🇾 MY 1
+  password: Lw_DP4+W.J5K33MD2Jy5zQVuT5n71+=BcD
+  port: 443
+  server: 38.60.168.129
+  skip-cert-verify: true
+  sni: 38.60.168.129
+  type: trojan
+  udp: true
+- name: 🇰🇿 KZ 1
+  password: vpn
+  port: 2025
+  server: 45.82.14.144
+  skip-cert-verify: true
+  sni: 45.82.14.144
+  type: trojan
+  udp: true
+- name: 🇮🇪 IE 1
+  password: t1k169n5zmvvwn96r9ft
+  port: 57452
+  server: 146.70.90.198
+  skip-cert-verify: true
+  sni: 146.70.90.198
+  type: trojan
+  udp: true
+- name: 🇮🇪 IE 2
+  password: XG59623478
+  port: 443
+  server: singular-lark.rooster465.autos
+  skip-cert-verify: true
+  sni: singular-lark.rooster465.autos
+  type: trojan
+  udp: true
+- name: 🇮🇪 IE 4
+  password: XG59623478
+  port: 443
+  server: 3.249.67.252
+  skip-cert-verify: true
+  sni: singular-lark.rooster465.autos
+  type: trojan
+  udp: true
+- cipher: chacha20-ietf-poly1305
+  name: 🇪🇸 ES 1
+  port: 8388
+  server: 140.174.184.5
+  type: ss
+- name: 🇵🇭 PH 1
+  password: '3632736327'
+  port: 2398
+  server: flb06181447.tmdsb.org
+  skip-cert-verify: true
+  sni: flb06181447.tmdsb.org
+  type: trojan
+  udp: true
+- cipher: chacha20-ietf-poly1305
+  name: 🇵🇭 PH 2
+  port: 16292
+  server: 38.54.80.160
+  type: ss
+- cipher: aes-128-gcm
+  name: 🇬🇧 GB 1
+  port: 443
+  server: 158.173.24.73
+  type: ss
+- cipher: aes-128-gcm
+  name: 🇬🇧 GB 2
+  port: 443
+  server: 141.98.101.182
+  type: ss
+- cipher: aes-256-gcm
+  name: 🇬🇧 GB 3
+  port: 7001
+  server: 94.156.250.148
+  type: ss
+- cipher: aes-128-gcm
+  name: 🇬🇧 GB 4
+  port: 443
+  server: 141.98.101.181
+  type: ss
+- cipher: aes-128-gcm
+  name: 🇬🇧 GB 5
+  port: 443
+  server: 141.98.101.179
+  type: ss
+- cipher: aes-128-gcm
+  name: 🇬🇧 GB 6
+  port: 443
+  server: 141.98.101.178
+  type: ss
+- name: 🇬🇧 GB 7
+  password: 2c9fc6cc-3834-4e3d-a4e5-1b1a63929d0f
+  port: 443
+  server: 193.163.85.39
+  skip-cert-verify: true
+  sni: platyscelis.duckdns.org
+  type: trojan
+  udp: true
+- name: 🇬🇧 GB 8
+  port: 58748
+  server: ara.public.lat
+  type: vless
+  udp: true
+  uuid: 21e22226-0b96-4b4e-9a91-5c7f9e3f1760
+- cipher: rc4-md5
+  name: 🇬🇧 GB 9
+  port: 8080
+  server: 146.70.61.37
+  type: ss
+- cipher: aes-128-gcm
+  name: 🇨🇦 CA 1
+  port: 443
+  server: 149.22.95.183
+  type: ss
+- cipher: rc4-md5
+  name: 🇨🇦 CA 2
+  port: 8080
+  server: 137.184.174.93
+  type: ss
+- name: 🇰🇷 KR 1
+  password: '3632736327'
+  port: 1738
+  server: kr04212337.tmdsb.org
+  skip-cert-verify: true
+  sni: kr04212337.tmdsb.org
+  type: trojan
+  udp: true
+- name: 🇰🇷 KR 2
+  password: '3632736327'
+  port: 2648
+  server: kr04212339.tmdsb.org
+  skip-cert-verify: true
+  sni: kr04212339.tmdsb.org
+  type: trojan
+  udp: true
+- cipher: aes-256-gcm
+  name: 🇰🇷 KR 3
+  port: 6679
+  server: 141.164.45.187
+  type: ss
+- cipher: aes-256-gcm
+  name: 🇰🇷 KR 4
+  port: 7001
+  server: 141.164.45.187
+  type: ss
+- name: 🇰🇷 KR 5
+  password: '3632736327'
+  port: 1864
+  server: kr04021338.tmdsb.org
+  skip-cert-verify: true
+  sni: kr04021338.tmdsb.org
+  type: trojan
+  udp: true
+- cipher: aes-256-gcm
+  name: 🇸🇬 SG 1
+  port: 8888
+  server: aw-sg.vndmall.pro
+  type: ss
+- cipher: aes-256-gcm
+  name: 🇸🇦 SA 1
+  port: 5004
+  server: 156.244.8.155
+  type: ss
+- name: 🇱🇹 LT 1
+  port: 443
+  server: server.slavkiti.monster
+  type: vless
+  udp: true
+  uuid: 4d017db2-7655-4276-9557-e2ec25b04ee7
+- name: 🇭🇰 HK 1
+  password: BxceQaOe
+  port: 443
+  server: 119.246.1.143
+  skip-cert-verify: true
+  sni: 119.246.1.143
+  type: trojan
+  udp: true
+- name: 🇭🇰 HK 3
+  password: XG59623478
+  port: 443
+  server: growing-oyster.rooster465.autos
+  skip-cert-verify: true
+  sni: growing-oyster.rooster465.autos
+  type: trojan
+  udp: true
+- name: 🇭🇰 HK 6
+  password: OccIqeORGQwiNkwS
+  port: 19128
+  server: jpbgp.netvigor.cc
+  skip-cert-verify: true
+  sni: yazhou10.dynu.net
+  type: trojan
+  udp: true
+- cipher: aes-256-gcm
+  name: 🇮🇹 IT 1
+  port: 7001
+  server: 185.213.20.110
+  type: ss
+- name: 🇨🇭 CH 1
+  password: 7f5rouvmiqm83905
+  port: 59618
+  server: 188.213.131.90
+  skip-cert-verify: true
+  sni: google.com
+  type: trojan
+  udp: true
+- name: 🇨🇭 CH 4
+  password: '-------BanV2ray------'
+  port: 53159
+  server: bnbnbbnbnbnbnbnbnbnbnbnbnvn.poki-pakipon.ir
+  skip-cert-verify: true
+  sni: chi.yahoo.com
+  type: trojan
+  udp: true
+- name: 🇨🇭 CH 5
+  password: '------BanV2ray-----'
+  port: 19442
+  server: bnbnbbnbnbnbnbnbnbnbnbnbnvn.poki-pakipon.ir
+  skip-cert-verify: true
+  sni: chi.yahoo.com
+  type: trojan
+  udp: true
+- name: 🇮🇩 ID 1
+  password: '3632736327'
+  port: 3367
+  server: ine07011438.tmdsb.org
+  skip-cert-verify: true
+  sni: ine07011438.tmdsb.org
+  type: trojan
+  udp: true
+- name: 🇦🇺 AU 1
+  password: XG59623478
+  port: 443
+  server: stirring-dane.rooster465.autos
+  skip-cert-verify: true
+  sni: stirring-dane.rooster465.autos
+  type: trojan
+  udp: true
+- name: 🇦🇺 AU 2
+  password: XG59623478
+  port: 443
+  server: concise-buck.rooster465.autos
+  skip-cert-verify: true
+  sni: concise-buck.rooster465.autos
+  type: trojan
+  udp: true
+- name: 🇵🇰 PK 1
+  password: S.ibYdZshHTF-ne.M+.Fznp_-hyFFnCSix
+  port: 443
+  server: 149.104.104.58
+  skip-cert-verify: true
+  sni: 149.104.104.58
+  type: trojan
+  udp: true
+proxy-groups:
+- name: Proxy
+  proxies: &id001
+  - 🇺🇸 US 1
+  - 🇺🇸 US 7
+  - 🇺🇸 US 8
+  - 🇺🇸 US 9
+  - 🇺🇸 US 10
+  - 🇺🇸 US 11
+  - 🇺🇸 US 12
+  - 🇺🇸 US 13
+  - 🇺🇸 US 14
+  - 🇺🇸 US 18
+  - 🇺🇸 US 20
+  - 🇺🇸 US 22
+  - 🇺🇸 US 24
+  - 🇺🇸 US 25
+  - 🇺🇸 US 26
+  - 🇺🇸 US 27
+  - 🇺🇸 US 28
+  - 🇩🇪 DE 1
+  - 🇩🇪 DE 2
+  - 🇩🇪 DE 3
+  - 🇩🇪 DE 4
+  - 🇩🇪 DE 5
+  - 🇩🇪 DE 6
+  - 🇩🇪 DE 10
+  - 🇩🇪 DE 14
+  - 🇩🇪 DE 20
+  - 🇩🇪 DE 22
+  - 🇩🇪 DE 25
+  - 🇩🇪 DE 42
+  - 🇩🇪 DE 43
+  - 🇩🇪 DE 44
+  - 🇳🇱 NL 1
+  - 🇳🇱 NL 4
+  - 🇳🇱 NL 5
+  - 🇳🇱 NL 6
+  - 🇳🇱 NL 7
+  - 🇳🇱 NL 8
+  - 🇳🇱 NL 9
+  - 🇵🇱 PL 1
+  - 🇵🇱 PL 2
+  - 🇵🇱 PL 3
+  - 🇵🇱 PL 4
+  - 🇯🇵 JP 1
+  - 🇯🇵 JP 2
+  - 🇯🇵 JP 3
+  - 🇯🇵 JP 4
+  - 🇯🇵 JP 5
+  - 🇯🇵 JP 6
+  - 🇯🇵 JP 7
+  - 🇯🇵 JP 11
+  - 🇯🇵 JP 12
+  - 🇯🇵 JP 13
+  - 🇲🇾 MY 1
+  - 🇰🇿 KZ 1
+  - 🇮🇪 IE 1
+  - 🇮🇪 IE 2
+  - 🇮🇪 IE 4
+  - 🇪🇸 ES 1
+  - 🇵🇭 PH 1
+  - 🇵🇭 PH 2
+  - 🇬🇧 GB 1
+  - 🇬🇧 GB 2
+  - 🇬🇧 GB 3
+  - 🇬🇧 GB 4
+  - 🇬🇧 GB 5
+  - 🇬🇧 GB 6
+  - 🇬🇧 GB 7
+  - 🇬🇧 GB 8
+  - 🇬🇧 GB 9
+  - 🇨🇦 CA 1
+  - 🇨🇦 CA 2
+  - 🇰🇷 KR 1
+  - 🇰🇷 KR 2
+  - 🇰🇷 KR 3
+  - 🇰🇷 KR 4
+  - 🇰🇷 KR 5
+  - 🇸🇬 SG 1
+  - 🇸🇦 SA 1
+  - 🇱🇹 LT 1
+  - 🇭🇰 HK 1
+  - 🇭🇰 HK 3
+  - 🇭🇰 HK 6
+  - 🇮🇹 IT 1
+  - 🇨🇭 CH 1
+  - 🇨🇭 CH 4
+  - 🇨🇭 CH 5
+  - 🇮🇩 ID 1
+  - 🇦🇺 AU 1
+  - 🇦🇺 AU 2
+  - 🇵🇰 PK 1
+  type: select
+- interval: 300
+  name: Auto
+  proxies: *id001
+  type: url-test
+  url: https://www.gstatic.com/generate_204
+rules:
+- DOMAIN-SUFFIX,google.com,Proxy
+- DOMAIN-SUFFIX,youtube.com,Proxy
+- DOMAIN-SUFFIX,cn,DIRECT
+- GEOIP,CN,DIRECT
+- MATCH,Proxy
